@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"saliva-movie/internal/controller/hot"
+	"saliva-movie/internal/controller/searchInto"
 	"saliva-movie/internal/controller/searchMovie"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -25,6 +26,7 @@ var (
 					hello.NewV1(),
 					hot.NewV1(),
 					searchMovie.NewV1(),
+					searchInto.NewV1(),
 				)
 			})
 			s.Run()

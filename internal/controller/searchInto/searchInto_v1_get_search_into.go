@@ -1,4 +1,4 @@
-package searchMovie
+package searchInto
 
 import (
 	"context"
@@ -10,18 +10,16 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
-	"saliva-movie/api/searchMovie/v1"
+	"saliva-movie/api/searchInto/v1"
 )
 
-func (c *ControllerV1) GetSearchMovie(ctx context.Context, req *v1.GetSearchMovieReq) (res *v1.GetSearchMovieRes, err error) {
-
-	searchInfo := GetSearchInfo()
-	g.RequestFromCtx(ctx).Response.WriteJson(searchInfo)
+func (c *ControllerV1) GetSearchInto(ctx context.Context, req *v1.GetSearchIntoReq) (res *v1.GetSearchIntoRes, err error) {
+	searchInto := GetSearchInfo()
+	g.RequestFromCtx(ctx).Response.WriteJson(searchInto)
 	return
 }
-
-//internal
 
 func GetSearchInfo() map[string]interface{} {
 
@@ -76,8 +74,6 @@ func GetSearchInfo() map[string]interface{} {
 
 	jsonStr := string(body)
 
-	fmt.Println(jsonStr)
-
 	var search Search
 
 	err2 := json.Unmarshal([]byte(jsonStr), &search)
@@ -85,32 +81,36 @@ func GetSearchInfo() map[string]interface{} {
 		log.Fatal("JSON解析错误:", err)
 	}
 
-	vodNameList := make([]string, len(search.List))
-	vodPicList := make([]string, len(search.List))
-	vodPlayUrlList := make([]string, len(search.List))
-	vodContentList := make([]string, len(search.List))
-	vodClassList := make([]string, len(search.List))
-	subTitleList := make([]string, len(search.List))
-	vodIdList := make([]int, len(search.List))
+	vodName := ""
+	vodPic := ""
+	vodPlayUrl := ""
+	vodContent := ""
+	//vodClass := ""
+	subTitle := ""
+	vodId := 0
 
 	for _, v := range search.List {
-		subTitle := v.VodYear + "/" + v.VodArea + "/" + v.VodClass + "/" + v.VodTime
-		vodNameList = append(vodNameList, v.VodName)
-		vodPicList = append(vodPicList, v.VodPic)
-		vodPlayUrlList = append(vodPlayUrlList, v.VodPlayURL+"#")
-		vodContentList = append(vodContentList, v.VodContent)
-		vodClassList = append(vodClassList, v.VodClass)
-		subTitleList = append(subTitleList, subTitle)
-		vodIdList = append(vodIdList, v.VodID)
+
+		vodName = v.VodName
+		vodPic = v.VodPic
+
+		lastDollarIndex := strings.LastIndex(v.VodPlayURL, "$")
+		substring := v.VodPlayURL[lastDollarIndex+1:]
+
+		vodPlayUrl = substring
+		vodContent = v.VodContent
+		//vodClass = v.VodClass
+		subTitle = v.VodYear + "/" + v.VodArea + "/" + v.VodClass + "/" + v.VodTime
+		vodId = v.VodID
 	}
 
 	m := map[string]interface{}{
-		"title":        vodNameList,
-		"subTitle":     subTitleList,
-		"pic":          vodPicList,
-		"brief":        vodContentList,
-		"playUrl":      vodPlayUrlList,
-		"movieId":      vodIdList,
+		"title":        vodName,
+		"subTitle":     subTitle,
+		"pic":          vodPic,
+		"brief":        vodContent,
+		"playUrl":      vodPlayUrl,
+		"movieId":      vodId,
 		"resourceLink": data[0].Url,
 	}
 	//vodClass := search.MyClass
